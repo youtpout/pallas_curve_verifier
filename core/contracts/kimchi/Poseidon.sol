@@ -34,9 +34,20 @@ contract Poseidon is PallasCurve, PallasConstants {
     function getMdsValue(
         uint256 row,
         uint256 col
-    ) internal view returns (uint256) {
-        require(row < 3 && col < 3, "Invalid MDS indices");
-        return mdsMatrix[row][col];
+    ) internal pure returns (uint256) {
+        if (row == 0 && col == 0) return MDS_00;
+        if (row == 0 && col == 1) return MDS_01;
+        if (row == 0 && col == 2) return MDS_02;
+
+        if (row == 1 && col == 0) return MDS_10;
+        if (row == 1 && col == 1) return MDS_11;
+        if (row == 1 && col == 2) return MDS_12;
+
+        if (row == 2 && col == 0) return MDS_20;
+        if (row == 2 && col == 1) return MDS_21;
+        if (row == 2 && col == 2) return MDS_22;
+
+        revert("Index out of bounds");
     }
 
     /// @notice Retrieves round constant for specified round and position

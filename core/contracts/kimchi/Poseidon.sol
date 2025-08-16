@@ -54,16 +54,19 @@ contract Poseidon is PallasCurve, PallasConstants {
     /// @dev Used in the Poseidon permutation
     /// @param round Round number
     /// @param pos Position within the round
-    /// @return uint256 Round constant value
+    /// @return result Round constant value
     function getRoundConstant(
         uint256 round,
         uint256 pos
-    ) internal view returns (uint256) {
+    ) internal view returns (uint256 result) {
         require(
             round < POSEIDON_FULL_ROUNDS && pos < 3,
             "Invalid round constant indices"
         );
-        return roundConstants[round][pos];
+        assembly {
+            // load directly from storage
+            result := sload(add(add(roundConstants.slot, mul(round, 3)), pos))
+        }
     }
 
     /// @notice Performs matrix multiplication with MDS matrix

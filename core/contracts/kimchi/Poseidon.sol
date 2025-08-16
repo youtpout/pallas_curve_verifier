@@ -25,31 +25,6 @@ contract Poseidon is PallasCurve, PallasConstants {
         return mulmod(x6, x, FIELD_MODULUS);
     }
 
-    // Matrix and Round Constants
-    /// @notice Retrieves value from MDS matrix at specified position
-    /// @dev Used in the Poseidon permutation
-    /// @param row Row index of MDS matrix
-    /// @param col Column index of MDS matrix
-    /// @return uint256 Value at specified position
-    function getMdsValue(
-        uint256 row,
-        uint256 col
-    ) internal pure returns (uint256) {
-        if (row == 0 && col == 0) return MDS_00;
-        if (row == 0 && col == 1) return MDS_01;
-        if (row == 0 && col == 2) return MDS_02;
-
-        if (row == 1 && col == 0) return MDS_10;
-        if (row == 1 && col == 1) return MDS_11;
-        if (row == 1 && col == 2) return MDS_12;
-
-        if (row == 2 && col == 0) return MDS_20;
-        if (row == 2 && col == 1) return MDS_21;
-        if (row == 2 && col == 2) return MDS_22;
-
-        revert("Index out of bounds");
-    }
-
     /// @notice Retrieves round constant for specified round and position
     /// @dev Used in the Poseidon permutation
     /// @param round Round number
@@ -78,31 +53,31 @@ contract Poseidon is PallasCurve, PallasConstants {
     ) internal view returns (uint256[3] memory result) {
         result[0] = addmod(
             addmod(
-                mulmod(getMdsValue(0, 0), state[0], FIELD_MODULUS),
-                mulmod(getMdsValue(0, 1), state[1], FIELD_MODULUS),
+                mulmod(MDS_00, state[0], FIELD_MODULUS),
+                mulmod(MDS_01, state[1], FIELD_MODULUS),
                 FIELD_MODULUS
             ),
-            mulmod(getMdsValue(0, 2), state[2], FIELD_MODULUS),
+            mulmod(MDS_02, state[2], FIELD_MODULUS),
             FIELD_MODULUS
         );
 
         result[1] = addmod(
             addmod(
-                mulmod(getMdsValue(1, 0), state[0], FIELD_MODULUS),
-                mulmod(getMdsValue(1, 1), state[1], FIELD_MODULUS),
+                mulmod(MDS_10, state[0], FIELD_MODULUS),
+                mulmod(MDS_11, state[1], FIELD_MODULUS),
                 FIELD_MODULUS
             ),
-            mulmod(getMdsValue(1, 2), state[2], FIELD_MODULUS),
+            mulmod(MDS_12, state[2], FIELD_MODULUS),
             FIELD_MODULUS
         );
 
         result[2] = addmod(
             addmod(
-                mulmod(getMdsValue(2, 0), state[0], FIELD_MODULUS),
-                mulmod(getMdsValue(2, 1), state[1], FIELD_MODULUS),
+                mulmod(MDS_20, state[0], FIELD_MODULUS),
+                mulmod(MDS_21, state[1], FIELD_MODULUS),
                 FIELD_MODULUS
             ),
-            mulmod(getMdsValue(2, 2), state[2], FIELD_MODULUS),
+            mulmod(MDS_22, state[2], FIELD_MODULUS),
             FIELD_MODULUS
         );
     }

@@ -123,66 +123,6 @@ describe("PallasFieldsSignatureVerifier", function () {
       return { verifier, signedFields, altSignedFields, keypair, client };
     }
 
-    it("Should verify signature through all steps in case valid.", async function () {
-      const { verifier, signedFields, client } = await loadFixture(
-        deployAndSetupFields
-      );
-
-      const signatureObject = Signature.fromBase58(signedFields.signature);
-      const s = signatureObject.s.toBigInt();
-      const r = signatureObject.r.toBigInt();
-
-      const signer = PublicKey.fromBase58(signedFields.publicKey);
-      const signerFull = signer.toGroup();
-
-      const result = client.verifyFields({
-        data: signedFields.data,
-        signature: signedFields.signature,
-        publicKey: signedFields.publicKey,
-      });
-
-      // Start verification steps
-      const vfId = 0;
-
-      let txn;
-      txn = await verifier.step_0_VF_assignValues(
-        { x: signerFull.x.toString(), y: signerFull.y.toString() },
-        { r: r, s: s },
-        signedFields.data,
-        false // testnet
-      );
-      await txn.wait();
-
-      txn = await verifier.step_1_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VF(vfId);
-      await txn.wait();
-
-      const finalObject = await verifier.getVFState(vfId);
-      const bytesObject = await verifier.getVFStateBytesCompressed(vfId);
-      const decodedsol_gas =
-        await verifier.decodeVFStateBytesCompressed.estimateGas(bytesObject);
-
-      const decodedsol = await verifier.decodeVFStateBytesCompressed(
-        bytesObject
-      );
-
-      expect(finalObject[2]).to.equal(result);
-      expect(finalObject[2]).to.equal(true);
-    });
     it("Should return isValid=false in case invalid.", async function () {
       const { verifier, signedFields, altSignedFields, client } =
         await loadFixture(deployAndSetupFields);
@@ -206,40 +146,14 @@ describe("PallasFieldsSignatureVerifier", function () {
         publicKey: signedFields.publicKey,
       });
 
-      let vfId = 0;
-
-      let txn;
-      txn = await verifier.step_0_VF_assignValues(
+      const verification0 = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         signedFields.data,
-        false
       );
 
-      await txn.wait();
-
-      txn = await verifier.step_1_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VF(vfId);
-      await txn.wait();
-
-      let finalObject = await verifier.getVFState(vfId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(verification0).to.equal(false);
+      expect(verification0).to.equal(result);
 
       /// DIFFERENT DATA -------------------------------------------------
       signatureObject = Signature.fromBase58(signedFields.signature);
@@ -255,40 +169,14 @@ describe("PallasFieldsSignatureVerifier", function () {
         publicKey: signedFields.publicKey,
       });
 
-      vfId = 1;
-
-      txn;
-      txn = await verifier.step_0_VF_assignValues(
+      const verification1 = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         altSignedFields.data,
-        false
       );
 
-      await txn.wait();
-
-      txn = await verifier.step_1_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VF(vfId);
-      await txn.wait();
-
-      finalObject = await verifier.getVFState(vfId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(verification1).to.equal(false);
+      expect(verification1).to.equal(result);
 
       /// DIFFERENT PUBLIC KEY -------------------------------------------------
       signatureObject = Signature.fromBase58(signedFields.signature);
@@ -305,40 +193,13 @@ describe("PallasFieldsSignatureVerifier", function () {
         publicKey: random.toBase58(),
       });
 
-      vfId = 2;
-
-      txn;
-      txn = await verifier.step_0_VF_assignValues(
+      const verification2 = await verifier.verifySignatureIsValid(
         { x: randomFull.x.toString(), y: randomFull.y.toString() },
         { r: r, s: s },
         signedFields.data,
-        false
       );
-
-      await txn.wait();
-
-      txn = await verifier.step_1_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VF(vfId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VF(vfId);
-      await txn.wait();
-
-      finalObject = await verifier.getVFState(vfId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(verification2).to.equal(false);
+      expect(verification2).to.equal(result);
     });
 
     it("Should verify signature in 1 step", async function () {

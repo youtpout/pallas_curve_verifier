@@ -340,5 +340,45 @@ describe("PallasFieldsSignatureVerifier", function () {
       expect(finalObject[2]).to.equal(false);
       expect(finalObject[2]).to.equal(result);
     });
+
+    it("Should verify signature in 1 step", async function () {
+      const { verifier, signedFields, client } = await loadFixture(
+        deployAndSetupFields
+      );
+
+      const signatureObject = Signature.fromBase58(signedFields.signature);
+      const s = signatureObject.s.toBigInt();
+      const r = signatureObject.r.toBigInt();
+
+      const signer = PublicKey.fromBase58(signedFields.publicKey);
+      const signerFull = signer.toGroup();
+
+      const paramVerify = {
+        data: signedFields.data,
+        signature: signedFields.signature,
+        publicKey: signedFields.publicKey,
+      };
+
+      // Start verification 
+      const verification = await verifier.verifySignatureIsValid(
+        { x: signerFull.x.toString(), y: signerFull.y.toString() },
+        { r: r, s: s },
+        signedFields.data
+      );
+
+      const signatureGas =
+        await verifier.testGasSignature(
+          { x: signerFull.x.toString(), y: signerFull.y.toString() },
+          { r: r, s: s },
+          signedFields.data
+        );
+      await signatureGas.wait();
+
+      const result = client.verifyFields(paramVerify);
+
+      expect(verification).to.equal(result);
+      expect(verification).to.equal(true);
+    });
   });
+
 });

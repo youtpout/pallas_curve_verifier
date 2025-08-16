@@ -2,6 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("@nomicfoundation/hardhat-verify");
 require("dotenv").config();
+require("hardhat-gas-reporter");
 // require("hardhat-gas-reporter");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {

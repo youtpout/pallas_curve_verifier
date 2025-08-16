@@ -10,7 +10,8 @@
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "hardhat": "^2.22.15"
+    "hardhat": "^2.22.15",
+    "hardhat-gas-reporter": "^2.3.0"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

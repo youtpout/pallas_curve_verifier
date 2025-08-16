@@ -52,6 +52,47 @@ contract PallasFieldsSignatureVerifier is Poseidon {
         delete vfLifeCycle[vfId];
     }
 
+    bool valid = false;
+    function testGasSignature(
+        Point calldata publicKey,
+        Signature calldata signature,
+        uint256[] calldata fields
+    ) external {
+        valid = verifySignatureIsValid(publicKey, signature, fields);
+    }
+
+    /// @notice Check the signature is valid for the given fields and public key
+    /// @dev Matches the behavior of verify() from o1js
+    /// @return bool True if the signature is valid, false otherwise
+    function verifySignatureIsValid(
+        Point calldata publicKey,
+        Signature calldata signature,
+        uint256[] calldata fields
+    ) public view returns (bool) {
+        if (!isValidPublicKey(publicKey)) revert InvalidPublicKey();
+
+        uint256 message = hashMessage(
+            fields,
+            publicKey,
+            signature.r,
+            "CodaSignature*******"
+        );
+
+        Point memory pointInGroup = _defaultToGroup(
+            PointCompressed({x: publicKey.x, isOdd: (publicKey.y & 1 == 1)})
+        );
+
+        Point memory G = Point(G_X, G_Y);
+        // Compute sG without storing it in the state
+        Point memory sG = scalarMul(G, signature.s);
+
+        Point memory ePk = scalarMul(pointInGroup, message);
+
+        Point memory R = addPoints(sG, Point(ePk.x, FIELD_MODULUS - ePk.y));
+
+        return (R.x == signature.r) && (R.y & 1 == 0);
+    }
+
     /// @notice Retrieves the complete state of a field verification process
     /// @dev Returns a copy of the state, not a reference
     /// @param vfId The ID of the verification process

@@ -120,7 +120,11 @@ describe("PallasFieldsSignatureVerifier", function () {
       ];
       const altSignedFields = client.signFields(altFields, keypair.privateKey);
 
-      return { verifier, signedFields, altSignedFields, keypair, client };
+      const twoFields = [3412n, 548748548n]
+
+      const twoSignedFields = client.signFields(twoFields, keypair.privateKey);
+
+      return { verifier, signedFields, altSignedFields, twoSignedFields, keypair, client };
     }
 
     it("Should return isValid=false in case invalid.", async function () {
@@ -232,6 +236,45 @@ describe("PallasFieldsSignatureVerifier", function () {
           { x: signerFull.x.toString(), y: signerFull.y.toString() },
           { r: r, s: s },
           signedFields.data
+        );
+      await signatureGas.wait();
+
+      const result = client.verifyFields(paramVerify);
+
+      expect(verification).to.equal(result);
+      expect(verification).to.equal(true);
+    });
+
+    it("Should verify 2 fiedls", async function () {
+      const { verifier, twoSignedFields, client } = await loadFixture(
+        deployAndSetupFields
+      );
+
+      const signatureObject = Signature.fromBase58(twoSignedFields.signature);
+      const s = signatureObject.s.toBigInt();
+      const r = signatureObject.r.toBigInt();
+
+      const signer = PublicKey.fromBase58(twoSignedFields.publicKey);
+      const signerFull = signer.toGroup();
+
+      const paramVerify = {
+        data: twoSignedFields.data,
+        signature: twoSignedFields.signature,
+        publicKey: twoSignedFields.publicKey,
+      };
+
+      // Start verification 
+      const verification = await verifier.verifySignatureIsValid(
+        { x: signerFull.x.toString(), y: signerFull.y.toString() },
+        { r: r, s: s },
+        [3412n, 548748548n]
+      );
+
+      const signatureGas =
+        await verifier.testGasSignature(
+          { x: signerFull.x.toString(), y: signerFull.y.toString() },
+          { r: r, s: s },
+          twoSignedFields.data
         );
       await signatureGas.wait();
 

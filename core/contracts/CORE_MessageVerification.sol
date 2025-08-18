@@ -42,7 +42,7 @@ contract PallasMessageSignatureVerifier is PoseidonLegacy {
         Signature calldata signature,
         string calldata message,
         bool network
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         if (!isValidPublicKey(publicKey)) revert InvalidPublicKey();
 
         uint256 messageHashed = hashMessageLegacy(

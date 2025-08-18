@@ -21,7 +21,7 @@ contract PallasFieldsSignatureVerifier is Poseidon {
         Point calldata publicKey,
         Signature calldata signature,
         uint256[] calldata fields
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         if (!isValidPublicKey(publicKey)) revert InvalidPublicKey();
 
         uint256 message = hashMessage(fields, publicKey, signature.r);
@@ -67,7 +67,7 @@ contract PallasFieldsSignatureVerifier is Poseidon {
     /// @return uint256 Poseidon hash of the character array
     function fromStringToHash(
         string memory str
-    ) public view returns (uint256[] memory, uint256) {
+    ) external view returns (uint256[] memory, uint256) {
         bytes memory strBytes = bytes(str);
         require(
             strBytes.length <= DEFAULT_STRING_LENGTH,

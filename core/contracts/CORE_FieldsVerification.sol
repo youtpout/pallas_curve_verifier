@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "./kimchi/Poseidon.sol";
 
 error InvalidPublicKey();
-error StepSkipped();
 
 /**
  * @title PallasFieldsSignatureVerifier
@@ -15,7 +14,7 @@ contract PallasFieldsSignatureVerifier is Poseidon {
     /// @notice Identifier for the type of verification.
     uint8 constant TYPE_VERIFY_FIELDS = 2;
 
-    bool valid = false;
+    bool public valid = false;
     function testGasSignature(
         Point calldata publicKey,
         Signature calldata signature,
@@ -34,12 +33,7 @@ contract PallasFieldsSignatureVerifier is Poseidon {
     ) public view returns (bool) {
         if (!isValidPublicKey(publicKey)) revert InvalidPublicKey();
 
-        uint256 message = hashMessage(
-            fields,
-            publicKey,
-            signature.r,
-            "CodaSignature*******"
-        );
+        uint256 message = hashMessage(fields, publicKey, signature.r);
 
         Point memory pointInGroup = _defaultToGroup(
             PointCompressed({x: publicKey.x, isOdd: (publicKey.y & 1 == 1)})

@@ -75,44 +75,24 @@ describe("PallasMessageSignatureVerifier", function () {
       const vmId = 0;
 
       let txn;
-      txn = await verifier.step_0_VM_assignValues(
+      txn = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         message,
         true
       );
-      await txn.wait();
 
-      txn = await verifier.step_1_VM(vmId);
-      await txn.wait();
+      expect(txn).to.equal(result);
+      expect(txn).to.equal(true);
 
-      txn = await verifier.step_2_VM(vmId);
-      await txn.wait();
+      // for gas test
 
-      txn = await verifier.step_3_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VM(vmId);
-      await txn.wait();
-
-      const finalObject = await verifier.getVMState(vmId);
-      const bytesObject = await verifier.getVMStateBytesCompressed(vmId);
-      const decodedsol_gas =
-        await verifier.decodeVMStateBytesCompressed.estimateGas(bytesObject);
-
-      const decodedsol = await verifier.decodeVMStateBytesCompressed(
-        bytesObject
+      await verifier.testGasSignature(
+        { x: signerFull.x.toString(), y: signerFull.y.toString() },
+        { r: r, s: s },
+        message,
+        true
       );
-      // console.log(decodedsol);
-
-      expect(finalObject[2]).to.equal(result);
-      expect(finalObject[2]).to.equal(true);
     });
 
     it("Should return isValid=false in case invalid data sent.", async function () {
@@ -140,37 +120,16 @@ describe("PallasMessageSignatureVerifier", function () {
       let vmId = 0;
 
       let txn;
-      txn = await verifier.step_0_VM_assignValues(
+      txn = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         signedMessage.data,
         true
       );
 
-      await txn.wait();
 
-      txn = await verifier.step_1_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VM(vmId);
-      await txn.wait();
-
-      let finalObject = await verifier.getVMState(vmId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(txn).to.equal(false);
+      expect(txn).to.equal(result);
 
       /// DIFFERENT DATA -------------------------------------------------
       s = BigInt(signedMessage.signature.scalar);
@@ -188,37 +147,15 @@ describe("PallasMessageSignatureVerifier", function () {
       vmId = 1;
 
       txn;
-      txn = await verifier.step_0_VM_assignValues(
+      txn = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         altSignedMessage.data,
         true
       );
 
-      await txn.wait();
-
-      txn = await verifier.step_1_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VM(vmId);
-      await txn.wait();
-
-      finalObject = await verifier.getVMState(vmId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(txn).to.equal(false);
+      expect(txn).to.equal(result);
 
       /// DIFFERENT PUBLIC KEY -------------------------------------------------
       s = BigInt(signedMessage.signature.scalar);
@@ -237,37 +174,15 @@ describe("PallasMessageSignatureVerifier", function () {
       vmId = 2;
 
       txn;
-      txn = await verifier.step_0_VM_assignValues(
+      txn = await verifier.verifySignatureIsValid(
         { x: randomFull.x.toString(), y: randomFull.y.toString() },
         { r: r, s: s },
         signedMessage.data,
         true
       );
 
-      await txn.wait();
-
-      txn = await verifier.step_1_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VM(vmId);
-      await txn.wait();
-
-      finalObject = await verifier.getVMState(vmId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(txn).to.equal(false);
+      expect(txn).to.equal(result);
     });
 
     it("Should return isValid=false in case inverted network bool sent as parameter.", async function () {
@@ -295,37 +210,15 @@ describe("PallasMessageSignatureVerifier", function () {
 
       let txn;
       /// Choosing testnet for the verification. Should return false finally.
-      txn = await verifier.step_0_VM_assignValues(
+      txn = await verifier.verifySignatureIsValid(
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         signedMessage.data,
         false // testnet
       );
 
-      await txn.wait();
-
-      txn = await verifier.step_1_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_2_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_3_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_4_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_5_VM(vmId);
-      await txn.wait();
-
-      txn = await verifier.step_6_VM(vmId);
-      await txn.wait();
-
-      let finalObject = await verifier.getVMState(vmId);
-
-      expect(finalObject[2]).to.equal(false);
-      expect(finalObject[2]).to.equal(result);
+      expect(txn).to.equal(false);
+      expect(txn).to.equal(result);
     });
   });
 });

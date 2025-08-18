@@ -50,7 +50,7 @@ contract Poseidon is PallasCurve, PallasConstants {
     /// @return result Result of matrix multiplication
     function mdsMultiply(
         uint256[3] memory state
-    ) internal view returns (uint256[3] memory result) {
+    ) internal pure returns (uint256[3] memory result) {
         result[0] = addmod(
             addmod(
                 mulmod(MDS_00, state[0], FIELD_MODULUS),
@@ -237,13 +237,11 @@ contract Poseidon is PallasCurve, PallasConstants {
     /// @param fields Array of message fields
     /// @param publicKey Public key point
     /// @param r X-coordinate of signature point
-    /// @param prefix Network-specific prefix
     /// @return uint256 Resulting message hash
     function hashMessage(
         uint256[] memory fields,
         Point memory publicKey,
-        uint256 r,
-        string memory prefix
+        uint256 r
     ) public view returns (uint256) {
         // Pre-allocate array and copy fields
         uint256[] memory fullInput = new uint256[](fields.length + 3);
@@ -275,10 +273,7 @@ contract Poseidon is PallasCurve, PallasConstants {
         // Use cached prefix value
         uint256[3] memory state = initialState();
         uint256[] memory prefixArray = new uint256[](1);
-        prefixArray[0] = keccak256(bytes(prefix)) ==
-            keccak256(bytes("MinaSignatureMainnet"))
-            ? MINA_PREFIX_FIELD
-            : CODA_PREFIX_FIELD;
+        prefixArray[0] = CODA_PREFIX_FIELD;
 
         state = update(state, prefixArray);
         state = update(state, fullInput);

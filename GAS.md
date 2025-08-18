@@ -1,4 +1,4 @@
-Consume approximatively 2m5 gas to verify a signature with 19 fields, 1M6 for 2 fields
+Consume approximatively 2m4 gas to verify a signature with 19 fields, 1M6 for 2 fields
 Consume approximatively 3m6 gas to verify a message
 
 

@@ -13,12 +13,20 @@ describe("PallasMessageSignatureVerifier", function () {
       "PallasMessageSignatureVerifier"
     );
     const verifier = await PallasSignatureVerifier.deploy();
-    return { verifier, deployer };
+    await verifier.waitForDeployment();
+
+    const TestGasContract = await ethers.getContractFactory(
+      "GasVerifier"
+    );
+    const testGas = await TestGasContract.deploy();
+    await testGas.waitForDeployment();
+
+    return { verifier, deployer, testGas };
   }
 
   describe("Message Signature Verification", function () {
     async function deployAndSetupMessage() {
-      const { verifier } = await loadFixture(deployVerifierFixture);
+      const { verifier, testGas } = await loadFixture(deployVerifierFixture);
 
       // Setup mina-signer
       const client = new Client({ network: "mainnet" });
@@ -51,11 +59,12 @@ describe("PallasMessageSignatureVerifier", function () {
         message,
         altMessage,
         altSignedMessage,
+        testGas
       };
     }
 
     it("Should verify signature through all steps in case valid.", async function () {
-      const { verifier, signedMessage, client, message } = await loadFixture(
+      const { verifier, signedMessage, client, message, testGas } = await loadFixture(
         deployAndSetupMessage
       );
 
@@ -86,8 +95,9 @@ describe("PallasMessageSignatureVerifier", function () {
       expect(txn).to.equal(true);
 
       // for gas test
-
-      await verifier.testGasSignature(
+      const addressVerifier = await verifier.getAddress();
+      await testGas.verifyMessage(
+        addressVerifier,
         { x: signerFull.x.toString(), y: signerFull.y.toString() },
         { r: r, s: s },
         message,

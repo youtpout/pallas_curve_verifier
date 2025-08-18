@@ -15,12 +15,19 @@ describe("PallasFieldsSignatureVerifier", function () {
       "PallasFieldsSignatureVerifier"
     );
     const verifier = await PallasSignatureVerifier.deploy();
-    return { verifier, deployer };
+    await verifier.waitForDeployment();
+
+    const TestGasContract = await ethers.getContractFactory(
+      "GasVerifier"
+    );
+    const testGas = await TestGasContract.deploy();
+    await testGas.waitForDeployment();
+    return { verifier, deployer, testGas };
   }
 
   describe("Fields Signature Verification", function () {
     async function deployAndSetupFields() {
-      const { verifier } = await loadFixture(deployVerifierFixture);
+      const { verifier, testGas } = await loadFixture(deployVerifierFixture);
 
       // Setup mina-signer
       const client = new Client({ network: "testnet" });
@@ -124,7 +131,7 @@ describe("PallasFieldsSignatureVerifier", function () {
 
       const twoSignedFields = client.signFields(twoFields, keypair.privateKey);
 
-      return { verifier, signedFields, altSignedFields, twoSignedFields, keypair, client };
+      return { verifier, signedFields, altSignedFields, twoSignedFields, keypair, client, testGas };
     }
 
     it("Should return isValid=false in case invalid.", async function () {
@@ -207,7 +214,7 @@ describe("PallasFieldsSignatureVerifier", function () {
     });
 
     it("Should verify signature in 1 step", async function () {
-      const { verifier, signedFields, client } = await loadFixture(
+      const { verifier, signedFields, client, testGas } = await loadFixture(
         deployAndSetupFields
       );
 
@@ -231,8 +238,10 @@ describe("PallasFieldsSignatureVerifier", function () {
         signedFields.data
       );
 
+      const addressVerifier = await verifier.getAddress();
       const signatureGas =
-        await verifier.testGasSignature(
+        await testGas.verifyField(
+          addressVerifier,
           { x: signerFull.x.toString(), y: signerFull.y.toString() },
           { r: r, s: s },
           signedFields.data
@@ -246,7 +255,7 @@ describe("PallasFieldsSignatureVerifier", function () {
     });
 
     it("Should verify 2 fiedls", async function () {
-      const { verifier, twoSignedFields, client } = await loadFixture(
+      const { verifier, twoSignedFields, client, testGas } = await loadFixture(
         deployAndSetupFields
       );
 
@@ -270,8 +279,10 @@ describe("PallasFieldsSignatureVerifier", function () {
         [3412n, 548748548n]
       );
 
+      const addressVerifier = await verifier.getAddress();
       const signatureGas =
-        await verifier.testGasSignature(
+        await testGas.verifyField(
+          addressVerifier,
           { x: signerFull.x.toString(), y: signerFull.y.toString() },
           { r: r, s: s },
           twoSignedFields.data

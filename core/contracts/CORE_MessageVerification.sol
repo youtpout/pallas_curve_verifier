@@ -15,16 +15,6 @@ contract PallasMessageSignatureVerifier is PoseidonLegacy {
     /// @notice Identifier for the type of verification.
     uint8 constant TYPE_VERIFY_MESSAGE = 1;
 
-    bool public valid = false;
-    function testGasSignature(
-        Point calldata publicKey,
-        Signature calldata signature,
-        string calldata message,
-        bool network
-    ) external {
-        valid = verifySignatureIsValid(publicKey, signature, message, network);
-    }
-
     /// @notice Validates if a point lies on the Pallas curve
     /// @dev Checks if the point coordinates satisfy the curve equation y² = x³ + 5
     /// @param point The point to validate with x and y coordinates

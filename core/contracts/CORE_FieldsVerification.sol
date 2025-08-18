@@ -14,15 +14,6 @@ contract PallasFieldsSignatureVerifier is Poseidon {
     /// @notice Identifier for the type of verification.
     uint8 constant TYPE_VERIFY_FIELDS = 2;
 
-    bool public valid = false;
-    function testGasSignature(
-        Point calldata publicKey,
-        Signature calldata signature,
-        uint256[] calldata fields
-    ) external {
-        valid = verifySignatureIsValid(publicKey, signature, fields);
-    }
-
     /// @notice Check the signature is valid for the given fields and public key
     /// @dev Matches the behavior of verify() from o1js
     /// @return bool True if the signature is valid, false otherwise
